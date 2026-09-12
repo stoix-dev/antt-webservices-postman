@@ -1,0 +1,526 @@
+{
+  "info": {
+    "name": "ANTT · Webservices (CIOT · RNTRC · Dados Abertos)",
+    "description": "Webservices e serviços eletrônicos da ANTT. Diferente da SEFAZ, a ANTT NÃO tem um webservice único para tudo: o núcleo transacional é a API pefServices (CIOT), que a ANTT abriu em 2026 (Portaria SUROC 6/2026); RNTRC e dados abertos são superfícies separadas.\n\n## Autenticação\npefServices (CIOT): mTLS com certificado e-CNPJ ICP-Brasil (o MESMO da SEFAZ). Configure em Settings > Certificates. RNTRC/dados abertos: consulta pública/CKAN, sem certificado.\n\n## Testado\nGerar CIOT em homologação com um e-CNPJ A1 real: HTTP 200, CIOT 560000554432 (12/09/2026).\n\n## Honestidade\nEndpoints do CIOT vêm do guia FlexDocs e dos paths reais da API; confirmar campos no Swagger oficial do Portal do Desenvolvedor antes de produção. Itens [a confirmar] não têm spec pública fechada. A API RNTRC do Portal do Desenvolvedor pode exigir credenciamento (portal SPA, não verificável por fetch).\n\nRef: Lei 11.442/2007, MP 1.343/2026, Res. ANTT 6.078/2026, Portaria SUROC 6/2026.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "cnpj",
+      "value": "",
+      "description": "CNPJ do emitente/contratante"
+    },
+    {
+      "key": "cpfCnpjTransportador",
+      "value": "",
+      "description": "CPF/CNPJ do transportador (TAC/ETC)"
+    },
+    {
+      "key": "rntrc",
+      "value": "",
+      "description": "RNTRC do transportador"
+    },
+    {
+      "key": "ciot",
+      "value": "",
+      "description": "código do CIOT"
+    },
+    {
+      "key": "ano",
+      "value": "2026",
+      "description": "ano da declaração"
+    },
+    {
+      "key": "idOperacao",
+      "value": "",
+      "description": "id interno da operação"
+    },
+    {
+      "key": "tipoOperacao",
+      "value": "",
+      "description": "tipo da operação (ver doc ANTT)"
+    },
+    {
+      "key": "valorFrete",
+      "value": "",
+      "description": "valor do frete (respeitar piso)"
+    },
+    {
+      "key": "dataISO",
+      "value": "",
+      "description": "data da declaração (ISO 8601)"
+    },
+    {
+      "key": "placa",
+      "value": "",
+      "description": "placa do veículo"
+    },
+    {
+      "key": "eixos",
+      "value": "",
+      "description": "número de eixos"
+    },
+    {
+      "key": "ibgeOrigem",
+      "value": "",
+      "description": "IBGE origem"
+    },
+    {
+      "key": "ibgeDestino",
+      "value": "",
+      "description": "IBGE destino"
+    },
+    {
+      "key": "km",
+      "value": "",
+      "description": "distância km"
+    },
+    {
+      "key": "naturezaCarga",
+      "value": "",
+      "description": "natureza da carga"
+    },
+    {
+      "key": "peso",
+      "value": "",
+      "description": "peso total"
+    },
+    {
+      "key": "pix",
+      "value": "",
+      "description": "chave Pix do frete"
+    },
+    {
+      "key": "motivo",
+      "value": "",
+      "description": "motivo do cancelamento"
+    }
+  ],
+  "item": [
+    {
+      "name": "CIOT · pefServices",
+      "description": "Ciclo de vida do CIOT. REST/JSON, mTLS por e-CNPJ. Via direta para ETC com frota própria (sem subcontratar TAC). 'Gerar' testado em 12/09/2026 (HTTP 200, CIOT 560000554432 com o um e-CNPJ A1 real). Base homolog https://appservices-hml.antt.gov.br/pefServices, prod https://appservices.antt.gov.br/pefServices.\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod).",
+      "item": [
+        {
+          "name": "1. Gerar CIOT [OK testado]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/gerar",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "gerar"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CpfCnpj\": \"{{cnpj}}\"\n}"
+            },
+            "description": "Reserva o número do CIOT (12 díg.). Resposta: Dados.CIOT. TESTADO: HTTP 200, Sucesso:true.\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Declarar Operação de Transporte",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/api/DeclaracaoOperacaoTransporte",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "api",
+                "DeclaracaoOperacaoTransporte"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"IdOperacaoTransporte\": \"{{idOperacao}}\",\n  \"TipoOperacao\": \"{{tipoOperacao}}\",\n  \"CpfCnpjContratado\": \"{{cpfCnpjTransportador}}\",\n  \"RNTRCContratado\": \"{{rntrc}}\",\n  \"ValorFrete\": \"{{valorFrete}}\",\n  \"DataDeclaracao\": \"{{dataISO}}\",\n  \"Veiculos\": [\n    {\n      \"Placa\": \"{{placa}}\",\n      \"RNTRC\": \"{{rntrc}}\",\n      \"Eixos\": \"{{eixos}}\"\n    }\n  ],\n  \"OrigemDestino\": {\n    \"MunicipioOrigem\": \"{{ibgeOrigem}}\",\n    \"MunicipioDestino\": \"{{ibgeDestino}}\",\n    \"Distancia\": \"{{km}}\"\n  },\n  \"DadosCarga\": {\n    \"NaturezaCarga\": \"{{naturezaCarga}}\",\n    \"PesoTotalCarga\": \"{{peso}}\"\n  },\n  \"InfPagamento\": {\n    \"ChavePix\": \"{{pix}}\",\n    \"CpfCnpj\": \"{{cnpj}}\"\n  }\n}"
+            },
+            "description": "Vincula dados e gera o código de 16 díg. Valida piso mínimo (bloqueia se abaixo). Antes da viagem. Confirmar campos no Swagger oficial.\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Consultar CIOT Gerado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/api/ConsultarCIOTGerado",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "api",
+                "ConsultarCIOTGerado"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CodigoIdentificacaoOperacao\": \"{{ciot}}\",\n  \"AnoDeclaracao\": \"{{ano}}\"\n}"
+            },
+            "description": "Situação do CIOT.\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Retificar Operação [a confirmar]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/api/RetificacaoOperacaoTransporte",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "api",
+                "RetificacaoOperacaoTransporte"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CodigoIdentificacaoOperacao\": \"{{ciot}}\"\n}"
+            },
+            "description": "Altera/adita. Path inferido; confirmar no Swagger.\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Cancelar Operação",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/api/CancelamentoOperacaoTransporte",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "api",
+                "CancelamentoOperacaoTransporte"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CodigoIdentificacaoOperacao\": \"{{ciot}}\",\n  \"MotivoCancelamento\": \"{{motivo}}\"\n}"
+            },
+            "description": "Cancela (janela pré-viagem).\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Encerrar Operação",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/api/EncerramentoOperacaoTransporte",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "api",
+                "EncerramentoOperacaoTransporte"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CodigoIdentificacaoOperacao\": \"{{ciot}}\",\n  \"DadosCarga\": {\n    \"PesoTotalCarga\": \"{{peso}}\"\n  }\n}"
+            },
+            "description": "Encerra após a viagem.\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Consultar Situação do Transportador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/api/ConsultaSituacaoTransportador",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "api",
+                "ConsultaSituacaoTransportador"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CpfCnpj\": \"{{cpfCnpjTransportador}}\",\n  \"RNTRC\": \"{{rntrc}}\"\n}"
+            },
+            "description": "Regularidade do transportador.\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        },
+        {
+          "name": "8. Consultar Frota do Transportador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/api/ConsultaFrotaTransportador",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "api",
+                "ConsultaFrotaTransportador"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CpfCnpj\": \"{{cpfCnpjTransportador}}\",\n  \"RNTRC\": \"{{rntrc}}\"\n}"
+            },
+            "description": "Frota vinculada ao RNTRC.\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        },
+        {
+          "name": "9. Consultar Exceção (piso/bloqueios)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://appservices-hml.antt.gov.br/pefServices/api/ConsultaExcecao",
+              "protocol": "https",
+              "host": [
+                "appservices-hml",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "pefServices",
+                "api",
+                "ConsultaExcecao"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CpfCnpj\": \"{{cnpj}}\"\n}"
+            },
+            "description": "Exceções/bloqueios (ex.: piso).\n\nmTLS com certificado e-CNPJ (ICP-Brasil). Settings > Certificates para appservices-hml.antt.gov.br (homolog) e appservices.antt.gov.br (prod)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "RNTRC · Registro de Transportadores",
+      "description": "Consulta do Registro Nacional de Transportadores Rodoviários de Cargas. A consulta pública web não exige login; a API do Portal do Desenvolvedor pode exigir credenciamento (a confirmar, o portal é SPA e não abre a spec por fetch). Provedores privados (Infosimples, Netrin) revendem por API.",
+      "item": [
+        {
+          "name": "Consulta pública RNTRC (web)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://consultapublica.antt.gov.br/",
+              "protocol": "https",
+              "host": [
+                "consultapublica",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [],
+              "query": []
+            },
+            "description": "Página web de consulta por transportador (RNTRC/CPF/CNPJ), localidade ou veículo. Não é API REST; é tela pública. A confirmar se há endpoint JSON por trás."
+          },
+          "response": []
+        },
+        {
+          "name": "Portal do Desenvolvedor · doc RNTRC",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://portaldodesenvolvedor.antt.gov.br/page/documentacao-RNTRC",
+              "protocol": "https",
+              "host": [
+                "portaldodesenvolvedor",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "page",
+                "documentacao-RNTRC"
+              ],
+              "query": []
+            },
+            "description": "Documentação da API RNTRC. Existência confirmada; se é aberta ou credenciada e a URL base: a confirmar (abrir no navegador). Provável exigência de token/gov.br."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dados Abertos (CKAN)",
+      "description": "Portal de dados abertos da ANTT (CKAN). Dataset RNTRC com CSVs mensais. Útil para carga analítica/cadastral em lote, não para consulta transacional em tempo real. API CKAN padrão (action API); Datastore por recurso a confirmar.",
+      "item": [
+        {
+          "name": "CKAN · pacote do dataset RNTRC",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://dados.antt.gov.br/api/3/action/package_show?id=rntrc",
+              "protocol": "https",
+              "host": [
+                "dados",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "api",
+                "3",
+                "action",
+                "package_show"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "rntrc"
+                }
+              ]
+            },
+            "description": "Metadados e lista de recursos (CSVs) do dataset RNTRC via API CKAN action."
+          },
+          "response": []
+        },
+        {
+          "name": "CKAN · listar datasets da ANTT",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://dados.antt.gov.br/api/3/action/package_list",
+              "protocol": "https",
+              "host": [
+                "dados",
+                "antt",
+                "gov",
+                "br"
+              ],
+              "path": [
+                "api",
+                "3",
+                "action",
+                "package_list"
+              ],
+              "query": []
+            },
+            "description": "Lista todos os datasets publicados. API CKAN padrão, pública."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
